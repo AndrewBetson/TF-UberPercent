@@ -1,0 +1,22 @@
+"Phrases"
+{
+	"UP_VoicePrefix"
+	{
+		"en"	"(Voice)"
+	}
+
+	"UP_ChargeNotReady"
+	{
+		"en"	"ÜberCharge Isn't Ready! (%d%s)"
+	}
+
+	"UP_ChargeAlmostReady"
+	{
+		"en"	"ÜberCharge Almost Ready (%d%s)"
+	}
+
+	"UP_ChargeReady"
+	{
+		"en"	"ÜberCharge Ready! (100%s)"
+	}
+}

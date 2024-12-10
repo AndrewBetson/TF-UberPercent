@@ -1,0 +1,49 @@
+"Games"
+{
+	"tf"
+	{
+		"Functions"
+		{
+			"CTFPlayer::SpeakConceptIfAllowed"
+			{
+				"signature"		"CTFPlayer::SpeakConceptIfAllowed"
+				"callconv"		"thiscall"
+				"return"		"bool"
+				"this"			"entity"
+
+				"arguments"
+				{
+					"iConcept"
+					{
+						"type"	"int"
+					}
+					"modifiers"
+					{
+						"type"	"charptr"
+					}
+					"pszOutResponseChosen"
+					{
+						"type"	"charptr"
+					}
+					"bufsize"
+					{
+						"type"	"int" // size_t
+					}
+					"filter"
+					{
+						"type"	"objectptr"
+					}
+				}
+			}
+		}
+
+		"Signatures"
+		{
+			"CTFPlayer::SpeakConceptIfAllowed"
+			{
+				"library"		"server"
+				"linux"			"@_ZN9CTFPlayer21SpeakConceptIfAllowedEiPKcPcjP16IRecipientFilter"
+			}
+		}
+	}
+}

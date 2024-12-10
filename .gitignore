@@ -1,0 +1,15 @@
+# Ignore everything by default.
+*.*
+!*/
+
+# Scripts and stuff.
+!*.sp
+!*.txt
+
+# Git stuff.
+!LICENSE.md
+!README.md
+!.gitignore
+
+# Don't commit data from staged builds.
+/__STAGING__/
