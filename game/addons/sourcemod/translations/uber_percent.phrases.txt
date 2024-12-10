@@ -12,7 +12,7 @@
 
 	"UP_ChargeAlmostReady"
 	{
-		"en"	"ÜberCharge Almost Ready (%d%s)"
+		"en"	"ÜberCharge Almost Ready! (%d%s)"
 	}
 
 	"UP_ChargeReady"
