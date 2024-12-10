@@ -12,7 +12,7 @@
 #pragma newdecls required
 
 #if !defined PLUGIN_VERSION
-	#define PLUGIN_VERSION "1.1.0"
+	#define PLUGIN_VERSION "1.2.0"
 #endif // !defined PLUGIN_VERSION
 
 DHookSetup gDetour_CTFPlayer_SpeakConceptIfAllowed;
@@ -148,19 +148,33 @@ public Action SndHook_UberChargeReady(
 	int MedigunHandle = GetEntPropEnt( Entity, Prop_Send, "m_hMyWeapons", 1 );
 	float UberPercent = GetEntPropFloat( MedigunHandle, Prop_Send, "m_flChargeLevel" );
 
-	if ( UberPercent < gAlmostReadyPct )
+	int MedigunDefIdx = GetEntProp( MedigunHandle, Prop_Send, "m_iItemDefinitionIndex" );
+	if ( MedigunDefIdx == 998 ) // The Vaccinator
 	{
-		int SoundToPlay = GetRandomInt( 0, 3 );
-		strcopy( Sound, PLATFORM_MAX_PATH, UBER_NOT_READY_SOUNDS[ SoundToPlay ] );
+		if ( UberPercent < 0.2499 )
+		{
+			int SoundToPlay = GetRandomInt( 0, 3 );
+			strcopy( Sound, PLATFORM_MAX_PATH, UBER_NOT_READY_SOUNDS[ SoundToPlay ] );
 
-		return Plugin_Changed;
+			return Plugin_Changed;
+		}
 	}
-	else if ( UberPercent < 1.0 )
+	else
 	{
-		int SoundToPlay = GetRandomInt( 0, 2 );
-		strcopy( Sound, PLATFORM_MAX_PATH, UBER_ALMOST_READY_SOUNDS[ SoundToPlay ] );
+		if ( UberPercent < gAlmostReadyPct )
+		{
+			int SoundToPlay = GetRandomInt( 0, 3 );
+			strcopy( Sound, PLATFORM_MAX_PATH, UBER_NOT_READY_SOUNDS[ SoundToPlay ] );
 
-		return Plugin_Changed;
+			return Plugin_Changed;
+		}
+		else if ( UberPercent < 1.0 )
+		{
+			int SoundToPlay = GetRandomInt( 0, 2 );
+			strcopy( Sound, PLATFORM_MAX_PATH, UBER_ALMOST_READY_SOUNDS[ SoundToPlay ] );
+
+			return Plugin_Changed;
+		}
 	}
 
 	return Plugin_Continue;
@@ -197,18 +211,34 @@ public MRESReturn Detour_CTFPlayer_SpeakConceptIfAllowed( int This, DHookReturn 
 	int RealUberPercent = RoundToFloor( UberPercent * 100.0 );
 	TFTeam Team = TF2_GetClientTeam( This );
 
-	if ( UberPercent < gAlmostReadyPct )
+	int MedigunDefIdx = GetEntProp( MedigunHandle, Prop_Send, "m_iItemDefinitionIndex" );
+	if ( MedigunDefIdx == 998 ) // The Vaccinator
 	{
-		PrintToTeam( Team, This, "{teamcolor}%t %N{default}: %t", "UP_VoicePrefix", This, "UP_ChargeNotReady", RealUberPercent, "%%%" );
-	}
-	else if ( UberPercent < 1.0 )
-	{
-		PrintToTeam( Team, This, "{teamcolor}%t %N{default}: %t", "UP_VoicePrefix", This, "UP_ChargeAlmostReady", RealUberPercent, "%%%" );
+		if ( UberPercent < 0.2499 )
+		{
+			PrintToTeam( Team, This, "{teamcolor}%t %N{default}: %t", "UP_VoicePrefix", This, "UP_ChargeNotReady", RealUberPercent, "%%%" );
+		}
+		else
+		{
+			PrintToTeam( Team, This, "{teamcolor}%t %N{default}: %t", "UP_VoicePrefix", This, "UP_ChargeReady", RealUberPercent, "%%%" );
+			return MRES_Ignored;
+		}
 	}
 	else
 	{
-		PrintToTeam( Team, This, "{teamcolor}%t %N{default}: %t", "UP_VoicePrefix", This, "UP_ChargeReady", "%%%" );
-		return MRES_Ignored;
+		if ( UberPercent < gAlmostReadyPct )
+		{
+			PrintToTeam( Team, This, "{teamcolor}%t %N{default}: %t", "UP_VoicePrefix", This, "UP_ChargeNotReady", RealUberPercent, "%%%" );
+		}
+		else if ( UberPercent < 1.0 )
+		{
+			PrintToTeam( Team, This, "{teamcolor}%t %N{default}: %t", "UP_VoicePrefix", This, "UP_ChargeAlmostReady", RealUberPercent, "%%%" );
+		}
+		else
+		{
+			PrintToTeam( Team, This, "{teamcolor}%t %N{default}: %t", "UP_VoicePrefix", This, "UP_ChargeReady", 100, "%%%" );
+			return MRES_Ignored;
+		}
 	}
 
 	return MRES_Ignored;

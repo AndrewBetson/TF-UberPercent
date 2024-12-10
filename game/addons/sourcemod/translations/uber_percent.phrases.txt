@@ -17,6 +17,6 @@
 
 	"UP_ChargeReady"
 	{
-		"en"	"ÜberCharge Ready! (100%s)"
+		"en"	"ÜberCharge Ready! (%d%s)"
 	}
 }
