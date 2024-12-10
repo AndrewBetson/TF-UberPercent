@@ -12,7 +12,7 @@
 #pragma newdecls required
 
 #if !defined PLUGIN_VERSION
-	#define PLUGIN_VERSION "1.0.0"
+	#define PLUGIN_VERSION "1.1.0"
 #endif // !defined PLUGIN_VERSION
 
 DHookSetup gDetour_CTFPlayer_SpeakConceptIfAllowed;
@@ -22,6 +22,21 @@ bool gEnabled;
 
 ConVar gCVarAlmostReadyPct;
 float gAlmostReadyPct;
+
+char UBER_NOT_READY_SOUNDS[][] =
+{
+	"vo/medic_jeers01.mp3",
+	"vo/medic_jeers04.mp3",
+	"vo/medic_jeers05.mp3",
+	"vo/medic_jeers12.mp3"
+};
+
+char UBER_ALMOST_READY_SOUNDS[][] =
+{
+	"vo/medic_incoming01.mp3",
+	"vo/medic_incoming02.mp3",
+	"vo/medic_incoming03.mp3"
+};
 
 public Plugin myinfo =
 {
@@ -35,6 +50,18 @@ public Plugin myinfo =
 public void OnPluginStart()
 {
 	LoadTranslations( "uber_percent.phrases" );
+
+	AddNormalSoundHook( SndHook_UberChargeReady );
+
+	for ( int i = 0; i < 3; i++ )
+	{
+		PrecacheSound( UBER_NOT_READY_SOUNDS[ i ] );
+	}
+
+	for ( int i = 0; i < 2; i++ )
+	{
+		PrecacheSound( UBER_ALMOST_READY_SOUNDS[ i ] );
+	}
 
 	Handle MyGameData = LoadGameConfigFile( "uber_percent.games" );
 	if ( !MyGameData )
@@ -88,6 +115,57 @@ void ConVar_AlmostReadyPct( ConVar CVar, const char[] OldValue, const char[] New
 	}
 }
 
+public Action SndHook_UberChargeReady(
+	int Clients[ MAXPLAYERS ], int &NumClients, char Sound[ PLATFORM_MAX_PATH ],
+	int &Entity, int &Channel, float &Volume, int &Level, int &Pitch, int &Flags,
+	char SoundEntry[ PLATFORM_MAX_PATH ], int &Seed
+)
+{
+	if ( !gEnabled )
+	{
+		return Plugin_Continue;
+	}
+
+	if ( Entity > MAXPLAYERS )
+	{
+		return Plugin_Continue;
+	}
+
+	if ( TF2_GetPlayerClass( Entity ) != TFClass_Medic )
+	{
+		return Plugin_Continue;
+	}
+
+	if (
+		strcmp( Sound, "vo/medic_AutoChargeReady01.mp3" ) != 0 &&
+		strcmp( Sound, "vo/medic_AutoChargeReady02.mp3" ) != 0 &&
+		strcmp( Sound, "vo/medic_AutoChargeReady03.mp3" ) != 0
+	)
+	{
+		return Plugin_Continue;
+	}
+
+	int MedigunHandle = GetEntPropEnt( Entity, Prop_Send, "m_hMyWeapons", 1 );
+	float UberPercent = GetEntPropFloat( MedigunHandle, Prop_Send, "m_flChargeLevel" );
+
+	if ( UberPercent < gAlmostReadyPct )
+	{
+		int SoundToPlay = GetRandomInt( 0, 3 );
+		strcopy( Sound, PLATFORM_MAX_PATH, UBER_NOT_READY_SOUNDS[ SoundToPlay ] );
+
+		return Plugin_Changed;
+	}
+	else if ( UberPercent < 1.0 )
+	{
+		int SoundToPlay = GetRandomInt( 0, 2 );
+		strcopy( Sound, PLATFORM_MAX_PATH, UBER_ALMOST_READY_SOUNDS[ SoundToPlay ] );
+
+		return Plugin_Changed;
+	}
+
+	return Plugin_Continue;
+}
+
 public MRESReturn Detour_CTFPlayer_SpeakConceptIfAllowed( int This, DHookReturn Return, DHookParam Params )
 {
 	if ( !gEnabled )
@@ -121,12 +199,10 @@ public MRESReturn Detour_CTFPlayer_SpeakConceptIfAllowed( int This, DHookReturn 
 
 	if ( UberPercent < gAlmostReadyPct )
 	{
-		Return.Value = true;
 		PrintToTeam( Team, This, "{teamcolor}%t %N{default}: %t", "UP_VoicePrefix", This, "UP_ChargeNotReady", RealUberPercent, "%%%" );
 	}
 	else if ( UberPercent < 1.0 )
 	{
-		Return.Value = true;
 		PrintToTeam( Team, This, "{teamcolor}%t %N{default}: %t", "UP_VoicePrefix", This, "UP_ChargeAlmostReady", RealUberPercent, "%%%" );
 	}
 	else
@@ -135,7 +211,7 @@ public MRESReturn Detour_CTFPlayer_SpeakConceptIfAllowed( int This, DHookReturn 
 		return MRES_Ignored;
 	}
 
-	return MRES_Supercede;
+	return MRES_Ignored;
 }
 
 void PrintToTeam( TFTeam Team, int Client, const char[] Msg, any ... )
