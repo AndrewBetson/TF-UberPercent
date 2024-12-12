@@ -12,7 +12,7 @@
 #pragma newdecls required
 
 #if !defined PLUGIN_VERSION
-	#define PLUGIN_VERSION "1.2.0"
+	#define PLUGIN_VERSION "1.2.1"
 #endif // !defined PLUGIN_VERSION
 
 DHookSetup gDetour_CTFPlayer_SpeakConceptIfAllowed;
@@ -126,7 +126,12 @@ public Action SndHook_UberChargeReady(
 		return Plugin_Continue;
 	}
 
-	if ( Entity > MAXPLAYERS )
+	if ( !IsValidEntity( Entity ) )
+	{
+		return Plugin_Continue;
+	}
+
+	if ( !( GetEntityFlags( Entity ) & FL_CLIENT ) )
 	{
 		return Plugin_Continue;
 	}
