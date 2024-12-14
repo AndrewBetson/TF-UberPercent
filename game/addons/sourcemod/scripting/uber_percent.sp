@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: © Andrew Betson
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 #include <sourcemod>
 #include <dhooks>
